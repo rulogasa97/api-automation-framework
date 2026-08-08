@@ -23,6 +23,7 @@
         <java.version>17</java.version>
         <rest-assured.version>5.5.0</rest-assured.version>
         <archunit.version>1.3.0</archunit.version>
+        <wiremock.version>3.9.1</wiremock.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,16 @@
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- WireMock (standalone/shaded): stubs the invented placeholder
+             sandbox fixture for apireplay-layer tests. Never targets any
+             real upstream host; every stub server binds to localhost. -->
+        <dependency>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
