@@ -33,6 +33,14 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Bean Validation (Jakarta Validation + Hibernate Validator):
+             required for @Valid/@NotBlank/@NotEmpty on request DTOs, since
+             spring-boot-starter-web does not pull this in by itself. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
         <!-- RestAssured: available at compile and test scope for later HTTP-level testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
