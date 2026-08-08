@@ -1,8 +1,8 @@
 package com.reservations.generator.api.dto;
 
-import com.reservations.generator.api.ErrorCode;
-import com.reservations.generator.api.ErrorMapper;
+import com.reservations.generator.domain.ErrorCode;
 import com.reservations.generator.domain.OrphanRisk;
+import com.reservations.generator.domain.ReservationFailureClassifier;
 import com.reservations.generator.domain.model.Pnr;
 import com.reservations.generator.domain.model.ReservationFailure;
 import com.reservations.generator.domain.model.ReservationResult;
@@ -22,7 +22,8 @@ import java.util.List;
  * sideEffect + passengerIndex + message) so the two failure-reporting paths
  * — whole-batch errors ({@link ErrorResponse}) and per-passenger failures
  * ({@link Failure}) — are consistent for API consumers. See
- * {@link ErrorMapper}'s class-level Javadoc for how the two paths relate.
+ * {@code api.ErrorMapper}'s class-level Javadoc for how the two paths
+ * relate.
  */
 public record ReservationResponse(List<String> pnrs, List<Failure> failures) {
 
@@ -38,7 +39,7 @@ public record ReservationResponse(List<String> pnrs, List<Failure> failures) {
     }
 
     private static Failure toFailure(ReservationFailure failure) {
-        ErrorCode errorCode = ErrorMapper.classifyPerPassengerFailure(failure.getCause());
+        ErrorCode errorCode = ReservationFailureClassifier.classifyPerPassenger(failure.getCause());
         return new Failure(errorCode, failure.getOrphanRisk(), failure.getPassengerIndex(), failure.getMessage());
     }
 }

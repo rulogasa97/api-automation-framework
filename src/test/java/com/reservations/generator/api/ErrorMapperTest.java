@@ -3,6 +3,7 @@ package com.reservations.generator.api;
 import com.reservations.generator.api.dto.CreateReservationsRequest;
 import com.reservations.generator.api.dto.ErrorResponse;
 import com.reservations.generator.domain.DriftDetectedException;
+import com.reservations.generator.domain.ErrorCode;
 import com.reservations.generator.domain.OrphanRisk;
 import com.reservations.generator.domain.PostDispatchReservationException;
 import com.reservations.generator.domain.PreDispatchReservationException;

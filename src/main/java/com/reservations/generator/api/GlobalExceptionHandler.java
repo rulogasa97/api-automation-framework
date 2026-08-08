@@ -13,9 +13,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * controller in {@code api}, delegating the actual mapping decision to
  * {@link ErrorMapper} so the rules stay consistent across the whole edge
  * (currently only {@link ReservationController}, but this advice applies to
- * any future controller too).
+ * any future controller in {@code api} too).
+ *
+ * <p>Scoped to {@code com.reservations.generator.api} via {@code basePackages}
+ * so it never intercepts failures from other driving adapters (e.g. a future
+ * {@code web} package), which must always surface JSON error bodies here and
+ * never have their own render-facing failures hijacked into JSON.
  */
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.reservations.generator.api")
 public class GlobalExceptionHandler {
 
     private final ErrorMapper errorMapper;

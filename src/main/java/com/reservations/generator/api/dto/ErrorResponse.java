@@ -1,6 +1,6 @@
 package com.reservations.generator.api.dto;
 
-import com.reservations.generator.api.ErrorCode;
+import com.reservations.generator.domain.ErrorCode;
 import com.reservations.generator.domain.OrphanRisk;
 
 /**

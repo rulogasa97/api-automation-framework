@@ -1,9 +1,12 @@
-package com.reservations.generator.api;
+package com.reservations.generator.domain;
 
 /**
- * Stable machine-readable error codes surfaced in {@link com.reservations.generator.api.dto.ErrorResponse}.
+ * Stable machine-readable error codes surfaced in
+ * {@link com.reservations.generator.api.dto.ErrorResponse}.
  *
- * <p>See {@link ErrorMapper} for the exception-to-code mapping rules.
+ * <p>See {@link ReservationFailureClassifier} for the exception-to-code
+ * mapping rules, and {@code api.ErrorMapper} for how a code is turned into
+ * an HTTP status and response body.
  */
 public enum ErrorCode {
 
