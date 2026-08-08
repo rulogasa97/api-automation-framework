@@ -22,7 +22,7 @@ public final class Passenger {
     private final String name;
 
     @JsonCreator
-    public Passenger(@JsonProperty("name") String name) {
+    public Passenger(@JsonProperty(value = "name", required = true) String name) {
         this.name = requireNonBlank(name);
     }
 
