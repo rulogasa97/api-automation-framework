@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--
+  The single v1 page (spec: "Single default flow, no selector" — there is
+  intentionally no flow-picker anywhere on this page). Rendered by:
+  - GET /               -> ReservationPageController (blank, one empty row)
+  - POST /ui/reservations, no HX-Request header -> ReservationFormController /
+    WebExceptionHandler (no-JS fallback: same route/contract, full page
+    instead of a bare fragment; see those classes' Javadoc for the
+    documented scope decision on value-preservation across a real page
+    reload).
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Reservation Generator</title>
+    <link rel="stylesheet" th:href="@{/css/united.css}"/>
+    <script th:src="@{/js/htmx.min.js}" defer="defer"></script>
+    <script th:src="@{/js/app.js}" defer="defer"></script>
+</head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="ual-main">
+    <h1 class="ual-page-title">Generate a reservation</h1>
+
+    <form id="reservation-form" class="ual-form"
+          hx-post="/ui/reservations" hx-target="#ual-result" hx-swap="innerHTML"
+          hx-indicator="#ual-spinner">
+
+        <div id="passenger-rows">
+            <!--
+              th:each on the SAME tag as th:replace/th:insert would fail: per
+              Thymeleaf's attribute precedence, fragment inclusion (1)
+              executes BEFORE iteration (2), so the fragment's arguments
+              would be evaluated before the loop variable exists. th:block
+              (removed from output, only its children remain) sidesteps this
+              by putting th:each and th:replace on different tags.
+            -->
+            <th:block th:each="passengerRow, rowStat : ${rows}">
+                <div th:replace="~{fragments/passenger-row :: row(${passengerRow.fields()}, ${rowStat.index})}"></div>
+            </th:block>
+        </div>
+
+        <button type="button" id="add-passenger-btn" class="ual-btn ual-btn--outline"
+                hx-get="/ui/passenger-row"
+                hx-vals="js:{index: document.querySelectorAll('[data-passenger-row]').length}"
+                hx-target="#passenger-rows" hx-swap="beforeend">
+            + Add passenger
+        </button>
+
+        <div class="ual-actions">
+            <button type="submit" class="ual-btn ual-btn--primary">Generar</button>
+        </div>
+    </form>
+
+    <div id="ual-spinner" class="htmx-indicator ual-spinner" role="status" aria-live="polite">
+        <span class="ual-spinner__dot"></span> Generating&hellip;
+    </div>
+
+    <div id="ual-result">
+        <!--
+          th:if combined with th:replace on the SAME tag would never actually
+          gate anything: fragment inclusion (precedence 1) runs before
+          conditional evaluation (precedence 3), so th:replace would always
+          fire and pass a null `result`/`view` straight into the fragment.
+          th:block (again) puts the two on separate tags.
+        -->
+        <th:block th:if="${result != null}">
+            <div th:replace="~{fragments/result :: resultSection(${result}, ${failureRows})}"></div>
+        </th:block>
+        <th:block th:if="${view != null}">
+            <div th:replace="~{fragments/error :: errorSection(${view})}"></div>
+        </th:block>
+    </div>
+</main>
+</body>
+</html>

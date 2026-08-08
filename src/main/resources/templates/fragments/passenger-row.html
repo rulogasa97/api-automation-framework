@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+  Renders one passenger row: one input per PassengerFieldDescriptor, in
+  schema order. Every attribute that would otherwise hardcode a field name
+  (input name/id, label text) is instead derived from `field` — zero
+  hardcoded field-name literals, per the spec's schema-driven-rendering
+  requirement (proven by TemplateFieldNameScanTest).
+
+  Dual use, both covered by WebControllersIntegrationTest:
+  - Rendered directly as the GET /ui/passenger-row response (add-row), with
+    `fields`/`rowIndex` supplied as top-level Model attributes.
+  - Included by reservation-page.html via an explicit-argument fragment call
+    (`row(${row.fields}, ${rowStat.index})`) for the page's initial row(s).
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<div th:fragment="row(fields, rowIndex)" class="ual-passenger-row" data-passenger-row>
+    <div class="ual-field" th:each="field : ${fields}">
+        <label class="ual-label"
+               th:text="${field.name()}"
+               th:for="${'passenger-' + rowIndex + '-' + field.name()}">Field</label>
+
+        <div th:switch="${field.kind().name()}">
+            <select th:case="'ENUM'" class="ual-input"
+                    th:id="${'passenger-' + rowIndex + '-' + field.name()}"
+                    th:name="${'passengers[' + rowIndex + '].' + field.name()}"
+                    th:required="${field.required()}">
+                <option value="" th:text="'-- select --'"></option>
+                <option th:each="allowedValue : ${field.allowedValues()}"
+                        th:value="${allowedValue}"
+                        th:text="${allowedValue}"
+                        th:selected="${allowedValue == field.value()}"></option>
+            </select>
+            <input th:case="'BOOLEAN'" type="checkbox" class="ual-input ual-input--checkbox"
+                   th:id="${'passenger-' + rowIndex + '-' + field.name()}"
+                   th:name="${'passengers[' + rowIndex + '].' + field.name()}"
+                   th:checked="${field.value() == 'true'}"/>
+            <input th:case="'NUMBER'" type="number" class="ual-input"
+                   th:id="${'passenger-' + rowIndex + '-' + field.name()}"
+                   th:name="${'passengers[' + rowIndex + '].' + field.name()}"
+                   th:value="${field.value()}"
+                   th:required="${field.required()}"/>
+            <input th:case="'DATE'" type="date" class="ual-input"
+                   th:id="${'passenger-' + rowIndex + '-' + field.name()}"
+                   th:name="${'passengers[' + rowIndex + '].' + field.name()}"
+                   th:value="${field.value()}"
+                   th:required="${field.required()}"/>
+            <input th:case="*" type="text" class="ual-input"
+                   th:id="${'passenger-' + rowIndex + '-' + field.name()}"
+                   th:name="${'passengers[' + rowIndex + '].' + field.name()}"
+                   th:value="${field.value()}"
+                   th:required="${field.required()}"/>
+        </div>
+
+        <span class="ual-field__error" th:if="${field.hasError()}" th:text="${field.errorMessage()}">error</span>
+    </div>
+
+    <button type="button" class="ual-btn ual-btn--remove"
+            onclick="this.closest('[data-passenger-row]').remove()">Remove</button>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<!--
+  Shared branded fragments reused by every page template — currently just
+  the black header bar with the icon-only logo (design's United branding
+  requirement). Not a full layout-dialect "master page": this project has
+  exactly one page in v1 (reservation-page.html), so a single reusable
+  `header` fragment is enough; a second page can `th:replace` the same
+  fragment without duplicating the header markup.
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>layout fragments (not rendered directly)</title>
+</head>
+<body>
+<header th:fragment="header" class="ual-header">
+    <div class="ual-header__chip">
+        <img th:src="@{/images/logo.svg}" alt="United" class="ual-header__logo"/>
+    </div>
+</header>
+</body>
+</html>

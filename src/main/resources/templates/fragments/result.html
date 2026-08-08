@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!--
+  Renders a successful (possibly partial) batch outcome: one PNR card with a
+  copy control per success (spec's "PNR Result Presentation" requirement),
+  one differentiated banner per per-passenger failure (a batch can partially
+  succeed — a per-passenger failure gets the exact same
+  errorCode/orphan-risk-driven treatment as a whole-batch one, via
+  `failureRows` = List<web.view.FailureRow>, see that class and
+  ResultView#forFailure). `app.js` wires the `[data-copy-pnr]` click handler
+  (delegated, so it also works after an htmx swap).
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<section th:fragment="resultSection(result, failureRows)" data-fragment="result">
+    <div class="ual-result__pnrs" th:if="${not result.pnrs.isEmpty()}">
+        <div class="ual-pnr-card" th:each="pnr : ${result.pnrs}">
+            <span class="ual-pnr-card__code" th:text="${pnr.code}">PNR</span>
+            <button type="button" class="ual-btn ual-btn--copy" th:attr="data-copy-pnr=${pnr.code}">Copy</button>
+        </div>
+    </div>
+    <div class="ual-result__failures" th:if="${not failureRows.isEmpty()}">
+        <div class="ual-failure-row" th:each="failureRow : ${failureRows}">
+            <p class="ual-failure-row__label" th:text="'Passenger ' + (${failureRow.passengerIndex()} + 1) + ':'">
+                Passenger
+            </p>
+            <div th:replace="~{fragments/error :: errorSection(${failureRow.view()})}"></div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

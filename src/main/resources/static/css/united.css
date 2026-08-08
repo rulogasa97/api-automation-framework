@@ -1,0 +1,306 @@
+/*
+ * United-branded styling for the reservation generator web UI.
+ *
+ * Sourced from the proposal's "Branding" section (brand guide PDF + supplied
+ * logo.svg + supplied site screenshot):
+ *   - Black header bar, icon-only logo (no wordmark) inset in a white/light
+ *     chip, with clear space equal to half the logo's own height on every
+ *     side (logo is 48x48 -> 24px chip padding).
+ *   - #1414D2 (United blue) as the ACCENT color only: primary CTA, links,
+ *     focus states, styled as an outlined pill button.
+ *   - Secondary dark-navy accent for section-level chrome (spinner text,
+ *     labels) sampled from the approximate range documented in the
+ *     proposal/design (#001A35-#0C2340); exact hex was not confirmed
+ *     against the source screenshot (open gap, see proposal), #001A35 used
+ *     here as the mid-point-adjacent, documented placeholder.
+ *   - Rounded-rectangle white input boxes, bold black labels above.
+ *   - Neutral system font stack (no exact corporate typeface supplied).
+ */
+
+:root {
+  --ual-blue: #1414D2;
+  --ual-black: #000000;
+  --ual-navy: #001A35;
+  --ual-white: #ffffff;
+  --ual-grey-bg: #f5f6f8;
+  --ual-grey-border: #d0d5dd;
+  --ual-radius-input: 8px;
+  --ual-radius-pill: 999px;
+  --ual-font: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ual-font);
+  background: var(--ual-grey-bg);
+  color: var(--ual-black);
+}
+
+/* ---------- Header ---------- */
+
+.ual-header {
+  background: var(--ual-black);
+  padding: 16px 24px;
+}
+
+.ual-header__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ual-white);
+  border-radius: 8px;
+  /* Half-symbol clear space: logo is 48x48, so 24px padding on every side. */
+  padding: 24px;
+  width: 48px;
+  height: 48px;
+}
+
+.ual-header__logo {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+
+/* ---------- Layout ---------- */
+
+.ual-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.ual-page-title {
+  color: var(--ual-navy);
+  font-size: 1.5rem;
+  margin-bottom: 24px;
+}
+
+/* ---------- Form / passenger rows ---------- */
+
+.ual-passenger-row {
+  background: var(--ual-white);
+  border: 1px solid var(--ual-grey-border);
+  border-radius: var(--ual-radius-input);
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.ual-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.ual-label {
+  font-weight: 700;
+  color: var(--ual-black);
+  font-size: 0.875rem;
+}
+
+.ual-input {
+  border: 1px solid var(--ual-grey-border);
+  border-radius: var(--ual-radius-input);
+  background: var(--ual-white);
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.ual-input:focus {
+  outline: 2px solid var(--ual-blue);
+  outline-offset: 1px;
+  border-color: var(--ual-blue);
+}
+
+.ual-field__error {
+  color: #b3261e;
+  font-size: 0.8125rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.ual-btn {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: var(--ual-radius-pill);
+  padding: 10px 24px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.ual-btn--outline {
+  background: var(--ual-white);
+  border-color: var(--ual-grey-border);
+  color: var(--ual-navy);
+}
+
+.ual-btn--primary,
+.ual-btn--retry {
+  background: var(--ual-white);
+  border-color: var(--ual-blue);
+  color: var(--ual-blue);
+}
+
+.ual-btn--primary:hover,
+.ual-btn--retry:hover {
+  background: var(--ual-blue);
+  color: var(--ual-white);
+}
+
+.ual-btn--remove {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+
+.ual-btn--copy {
+  background: var(--ual-white);
+  border-color: var(--ual-blue);
+  color: var(--ual-blue);
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+}
+
+.ual-actions {
+  margin-top: 8px;
+}
+
+/* ---------- Blocking spinner (shown while an hx-post is in flight) ---------- */
+
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 120ms ease-in;
+}
+
+.htmx-request.htmx-indicator,
+.htmx-request .htmx-indicator {
+  opacity: 1;
+}
+
+.ual-spinner {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--ual-white);
+  font-weight: 600;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.htmx-request .ual-spinner,
+.ual-spinner.htmx-request {
+  pointer-events: auto;
+}
+
+.ual-spinner__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ual-white);
+  animation: ual-spinner-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes ual-spinner-pulse {
+  0%, 100% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Results ---------- */
+
+.ual-result__pnrs {
+  margin-top: 24px;
+}
+
+.ual-pnr-card {
+  background: var(--ual-white);
+  border: 1px solid var(--ual-grey-border);
+  border-radius: var(--ual-radius-input);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ual-pnr-card__code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.ual-failure-row {
+  background: var(--ual-white);
+  border-left: 4px solid #b3261e;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+
+/* ---------- Errors: each banner-level code gets a distinct treatment ---------- */
+
+.ual-alert--inline {
+  background: #fff4e5;
+  border: 1px solid #f0b429;
+  border-radius: var(--ual-radius-input);
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.ual-banner {
+  border-radius: var(--ual-radius-input);
+  padding: 16px;
+  margin-top: 16px;
+  border: 2px solid transparent;
+}
+
+/* UPSTREAM_TIMEOUT: transient, retry-inviting -> amber. */
+.ual-banner--upstream-timeout {
+  background: #fff4e5;
+  border-color: #f0b429;
+  color: #7a4a00;
+}
+
+/* DRIFT_DETECTED: a real contract mismatch -> red. */
+.ual-banner--drift-detected {
+  background: #fdecea;
+  border-color: #b3261e;
+  color: #7a1712;
+}
+
+.ual-banner--session-unavailable,
+.ual-banner--internal-error {
+  background: #eceff1;
+  border-color: #6b7280;
+  color: var(--ual-navy);
+}
+
+/* Any code carrying sideEffect=POSSIBLE_ORPHAN_RESERVATION: highest
+   visibility, no retry button is rendered for this case (see
+   fragments/error.html). */
+.ual-banner--no-retry {
+  background: var(--ual-black);
+  border-color: #b3261e;
+  color: var(--ual-white);
+}
+
+.ual-banner__orphan-warning {
+  font-weight: 700;
+}

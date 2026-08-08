@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+  Renders a failure per the spec's "Error-Code-Specific Rendering"
+  requirement, driven entirely by ResultView (web/view/ResultView.java):
+
+  - INLINE (VALIDATION_FAILED/UNKNOWN_FIELD): a small field-level alert, no
+    Retry control (the form itself, untouched by this fragment, is the
+    retry path).
+  - BANNER (everything else): a banner whose CSS class is suffixed with
+    `view.cssVariant()` (e.g. `ual-banner--upstream-timeout` vs
+    `ual-banner--drift-detected`), so each banner-level code is visually
+    distinct, not just "banner" vs "inline". A Retry button is rendered ONLY
+    when `view.retryAllowed()` — POSSIBLE_ORPHAN_RESERVATION sets that to
+    false, so it deliberately gets no one-click retry affordance (spec's
+    "Possible orphan reservation gets no easy retry" scenario), just the
+    high-visibility warning paragraph below.
+-->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<section th:fragment="errorSection(view)" data-fragment="error" th:attr="data-treatment=${view.treatment().name()},data-retry-allowed=${view.retryAllowed()}">
+    <div th:if="${view.treatment().name() == 'BANNER'}"
+         class="ual-banner"
+         th:classappend="${'ual-banner--' + view.cssVariant() + (view.retryAllowed() ? '' : ' ual-banner--no-retry')}"
+         role="alert">
+        <p class="ual-banner__message" th:text="${view.message()}">Error message</p>
+        <p class="ual-banner__orphan-warning" th:if="${not view.retryAllowed()}">
+            A reservation may already have been created upstream for this submission. Do not resubmit blindly
+            &mdash; verify manually before trying again.
+        </p>
+        <button type="submit" form="reservation-form" class="ual-btn ual-btn--retry" th:if="${view.retryAllowed()}">
+            Retry
+        </button>
+    </div>
+    <div th:if="${view.treatment().name() == 'INLINE'}" class="ual-alert ual-alert--inline" role="alert">
+        <p th:text="${view.message()}">Field error</p>
+    </div>
+</section>
+</body>
+</html>
