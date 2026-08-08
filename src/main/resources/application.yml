@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: reservations-generator
+
+reservations:
+  # Sandbox-only target environment. This service never targets production
+  # upstream systems.
+  sandbox:
+    base-url: ${SANDBOX_BASE_URL:https://sandbox.example.com}
+
+  # Intra-request creates run sequentially; concurrency is bounded ACROSS
+  # callers by a single shared Semaphore. This value feeds
+  # CreateReservationsUseCase's permit count.
+  concurrency:
+    max-concurrent-creates: ${MAX_CONCURRENT_CREATES:8}
+
+  # StubSessionProvider (apireplay/session, implemented in slice 2) reads its
+  # sandbox session material from these keys. No secrets are committed here;
+  # values are supplied via environment variables.
+  apireplay:
+    session:
+      cookie: ${SANDBOX_SESSION_COOKIE:}
+      token: ${SANDBOX_SESSION_TOKEN:}
