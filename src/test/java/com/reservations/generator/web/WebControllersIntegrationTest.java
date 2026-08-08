@@ -74,6 +74,30 @@ class WebControllersIntegrationTest {
                 .andExpect(content().string(containsString("name=\"passengers[2].name\"")));
     }
 
+    /**
+     * R2-001 regression: the Add button must derive the new row's index from
+     * the {@code #passenger-rows} container's monotonic {@code
+     * data-next-index} counter, never from
+     * {@code document.querySelectorAll('[data-passenger-row]').length}. The
+     * live-DOM-count approach let a removed row's index be reused by the next
+     * Add (3 rows 0,1,2 -> remove row 1 -> DOM count is 2 -> Add would mint
+     * another index 2), so two rows would collide on the same {@code
+     * passengers[N].*} form-field names and {@link
+     * PassengerFormBinding#parseRows} would silently drop one row's
+     * submitted data. Seeding the counter to the server-rendered row count
+     * and only ever incrementing it (Remove never decrements it, see
+     * fragments/passenger-row.html) guarantees indices are never reused
+     * regardless of how many rows are removed in between.
+     */
+    @Test
+    void passengerRowsContainerSeedsAMonotonicNextIndexCounterInsteadOfLiveDomCount() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-next-index=\"1\"")))
+                .andExpect(content().string(not(containsString(
+                        "document.querySelectorAll('[data-passenger-row]').length"))));
+    }
+
     @Test
     void postWithoutHxRequestHeaderReturnsAFullPageWrapperWithThePnr() throws Exception {
         when(sessionProvider.acquire(any(FlowDefinition.class))).thenReturn(new StubSession());

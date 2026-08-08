@@ -27,7 +27,18 @@
           hx-post="/ui/reservations" hx-target="#ual-result" hx-swap="innerHTML"
           hx-indicator="#ual-spinner">
 
-        <div id="passenger-rows">
+        <!--
+          data-next-index is a monotonically-increasing counter, NOT the live
+          DOM row count: seeded to the number of rows rendered server-side,
+          incremented on every Add and deliberately never decremented on
+          Remove (fragments/passenger-row.html's Remove button only detaches
+          the DOM node). Deriving the new row's index from a live count of
+          [data-passenger-row] elements in the DOM instead would let a
+          removed row's index be reused by the next Add, so two rows could
+          collide on the same passengers[N].* form-field name and silently
+          drop one row's data on submit.
+        -->
+        <div id="passenger-rows" th:attr="data-next-index=${rows.size()}">
             <!--
               th:each on the SAME tag as th:replace/th:insert would fail: per
               Thymeleaf's attribute precedence, fragment inclusion (1)
@@ -43,7 +54,12 @@
 
         <button type="button" id="add-passenger-btn" class="ual-btn ual-btn--outline"
                 hx-get="/ui/passenger-row"
-                hx-vals="js:{index: document.querySelectorAll('[data-passenger-row]').length}"
+                hx-vals="js:{index: (function () {
+                    var container = document.getElementById('passenger-rows');
+                    var nextIndex = parseInt(container.dataset.nextIndex, 10);
+                    container.dataset.nextIndex = nextIndex + 1;
+                    return nextIndex;
+                })()}"
                 hx-target="#passenger-rows" hx-swap="beforeend">
             + Add passenger
         </button>
