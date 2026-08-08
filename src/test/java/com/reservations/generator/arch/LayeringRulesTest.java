@@ -17,9 +17,13 @@ import java.util.List;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 /**
- * Enforces the hexagonal layering rule from the design: {@code api} and
- * {@code domain} depend inward only; nothing in either package may import
- * {@code apireplay}, since it is a volatile outbound adapter.
+ * Enforces the hexagonal layering rule from the design: {@code api},
+ * {@code domain}, and {@code web} depend inward only; nothing in any of
+ * them may import {@code apireplay}, since it is a volatile outbound
+ * adapter. {@code web} (the second driving adapter, design D2/D5) must
+ * never depend on {@code api}, and {@code api} must never depend on
+ * {@code web} — each driving adapter talks to {@code domain} directly, not
+ * to its sibling adapter.
  */
 class LayeringRulesTest {
 
@@ -51,6 +55,33 @@ class LayeringRulesTest {
         ArchRule rule = noClasses()
                 .that().resideInAPackage(BASE_PACKAGE + ".api..")
                 .should().dependOnClassesThat().resideInAPackage(BASE_PACKAGE + ".apireplay..");
+
+        rule.check(CLASSES);
+    }
+
+    @Test
+    void webMustNotDependOnApireplay() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage(BASE_PACKAGE + ".web..")
+                .should().dependOnClassesThat().resideInAPackage(BASE_PACKAGE + ".apireplay..");
+
+        rule.check(CLASSES);
+    }
+
+    @Test
+    void webMustNotDependOnApi() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage(BASE_PACKAGE + ".web..")
+                .should().dependOnClassesThat().resideInAPackage(BASE_PACKAGE + ".api..");
+
+        rule.check(CLASSES);
+    }
+
+    @Test
+    void apiMustNotDependOnWeb() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage(BASE_PACKAGE + ".api..")
+                .should().dependOnClassesThat().resideInAPackage(BASE_PACKAGE + ".web..");
 
         rule.check(CLASSES);
     }

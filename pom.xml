@@ -41,6 +41,13 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Thymeleaf: template engine for the web UI driving adapter
+             (com.reservations.generator.web). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
         <!-- RestAssured: available at compile and test scope for later HTTP-level testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>

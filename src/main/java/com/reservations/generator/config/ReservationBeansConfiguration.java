@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
  * on the {@code SessionProvider}/{@code ReservationCreator} port types.
  */
 @Configuration
-@EnableConfigurationProperties(SandboxProperties.class)
+@EnableConfigurationProperties({SandboxProperties.class, WebUiProperties.class})
 public class ReservationBeansConfiguration {
 
     // PLACEHOLDER: the only supported flow so far, matching the fixture used
