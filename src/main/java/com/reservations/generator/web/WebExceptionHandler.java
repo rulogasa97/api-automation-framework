@@ -52,7 +52,7 @@ public class WebExceptionHandler {
         boolean fragmentOnly = request.getHeader(HtmxRequests.HX_REQUEST_HEADER) != null;
         ModelAndView mav = fragmentOnly ? new ModelAndView("fragments/error :: errorSection") : fullPage();
         mav.addObject("view", resultView);
-        mav.setStatus(statusFor(resultView));
+        mav.setStatus(statusFor(errorCode));
         return mav;
     }
 
@@ -67,8 +67,22 @@ public class WebExceptionHandler {
         return mav;
     }
 
-    private static HttpStatus statusFor(ResultView view) {
-        return view.treatment() == ResultView.Treatment.INLINE ? HttpStatus.BAD_REQUEST : HttpStatus.BAD_GATEWAY;
+    /**
+     * The HTTP status for a whole-batch failure, mirroring {@code
+     * api.ErrorMapper#statusFor}'s per-{@link ErrorCode} mapping exactly
+     * (duplicated here rather than shared: {@code web} must not depend on
+     * {@code api}, see this class's own Javadoc/design D5) so a code like
+     * {@code SESSION_UNAVAILABLE} keeps its distinct 503 instead of
+     * collapsing into one generic non-{@code INLINE} status.
+     */
+    private static HttpStatus statusFor(ErrorCode errorCode) {
+        return switch (errorCode) {
+            case VALIDATION_FAILED, UNKNOWN_FIELD -> HttpStatus.BAD_REQUEST;
+            case SESSION_UNAVAILABLE -> HttpStatus.SERVICE_UNAVAILABLE;
+            case DRIFT_DETECTED -> HttpStatus.BAD_GATEWAY;
+            case UPSTREAM_TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
+            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 
     private static String safeMessage(Throwable ex) {

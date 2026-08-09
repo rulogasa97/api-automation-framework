@@ -2,6 +2,7 @@ package com.reservations.generator.web;
 
 import com.reservations.generator.domain.DriftDetectedException;
 import com.reservations.generator.domain.PostDispatchReservationException;
+import com.reservations.generator.domain.PreDispatchReservationException;
 import com.reservations.generator.domain.ReservationCreator;
 import com.reservations.generator.domain.SessionProvider;
 import com.reservations.generator.domain.model.FlowDefinition;
@@ -189,6 +190,27 @@ class WebControllersIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("ual-banner--upstream-timeout")))
                 .andExpect(content().string(not(containsString("<input"))));
+    }
+
+    /**
+     * R2-002 regression: a whole-batch {@code SESSION_UNAVAILABLE} failure
+     * (session acquisition failed, nothing dispatched) must map to 503, the
+     * exact same status {@code api.ErrorMapper} uses for the same
+     * {@link com.reservations.generator.domain.ErrorCode#SESSION_UNAVAILABLE}
+     * code — not the previous one-size-fits-all 502 that collapsed every
+     * non-INLINE code together.
+     */
+    @Test
+    void sessionUnavailableRendersAsServiceUnavailableNotBadGateway() throws Exception {
+        when(sessionProvider.acquire(any(FlowDefinition.class)))
+                .thenThrow(new PreDispatchReservationException("session acquisition failed", null));
+
+        mockMvc.perform(post("/ui/reservations")
+                        .header("HX-Request", "true")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("passengers[0].name", "Ada Lovelace"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().string(containsString("ual-banner--session-unavailable")));
     }
 
     @Test
