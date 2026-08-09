@@ -40,8 +40,6 @@ import java.util.Map;
 @Controller
 public class ReservationFormController {
 
-    static final String HX_REQUEST_HEADER = "HX-Request";
-
     private final FlowRegistry flowRegistry;
     private final CreateReservationsUseCase createReservationsUseCase;
     private final WebUiProperties webUiProperties;
@@ -56,7 +54,7 @@ public class ReservationFormController {
 
     @PostMapping("/ui/reservations")
     public ModelAndView submit(HttpServletRequest request,
-                                @RequestHeader(value = HX_REQUEST_HEADER, required = false) String hxRequest) {
+                                @RequestHeader(value = HtmxRequests.HX_REQUEST_HEADER, required = false) String hxRequest) {
         FlowDefinition flow = requireDefaultFlow();
         List<Map<String, Object>> rawRows = PassengerFormBinding.parseRows(request.getParameterMap());
         List<Passenger> passengers = flowRegistry.parsePassengers(flow, rawRows);

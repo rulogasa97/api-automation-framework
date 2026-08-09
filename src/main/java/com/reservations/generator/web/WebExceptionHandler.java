@@ -36,8 +36,6 @@ import java.util.List;
 @ControllerAdvice(basePackages = "com.reservations.generator.web")
 public class WebExceptionHandler {
 
-    static final String HX_REQUEST_HEADER = "HX-Request";
-
     private final FlowRegistry flowRegistry;
     private final WebUiProperties webUiProperties;
 
@@ -52,7 +50,7 @@ public class WebExceptionHandler {
         OrphanRisk orphanRisk = ex instanceof ReservationCreationException rce ? rce.getOrphanRisk() : OrphanRisk.NONE;
         ResultView resultView = ResultView.from(errorCode, orphanRisk, safeMessage(ex));
 
-        boolean fragmentOnly = request.getHeader(HX_REQUEST_HEADER) != null;
+        boolean fragmentOnly = request.getHeader(HtmxRequests.HX_REQUEST_HEADER) != null;
         ModelAndView mav = fragmentOnly ? new ModelAndView("fragments/error :: errorSection") : fullPage();
         mav.addObject("view", resultView);
         mav.setStatus(statusFor(resultView));
