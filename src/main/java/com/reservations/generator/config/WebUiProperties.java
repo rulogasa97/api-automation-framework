@@ -3,11 +3,13 @@ package com.reservations.generator.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Binds {@code reservations.web.*}: the default flow the web UI resolves at
- * startup via {@link com.reservations.generator.domain.flow.FlowRegistry#require},
- * per design D6. Deliberately config-driven rather than "pick the only
- * registered flow": once a second flow is registered, silently guessing
- * would be ambiguous.
+ * Binds {@code reservations.web.*}: the default flow the web UI resolves
+ * per-request via {@link com.reservations.generator.domain.flow.FlowRegistry#require}
+ * (see {@code ReservationPageController}, {@code ReservationFormController},
+ * {@code WebExceptionHandler}, all of which call it inside their
+ * request-handling methods), per design D6. Deliberately config-driven
+ * rather than "pick the only registered flow": once a second flow is
+ * registered, silently guessing would be ambiguous.
  */
 @ConfigurationProperties(prefix = "reservations.web")
 public class WebUiProperties {
