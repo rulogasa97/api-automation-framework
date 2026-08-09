@@ -3,7 +3,6 @@ package com.reservations.generator.web;
 import com.reservations.generator.config.WebUiProperties;
 import com.reservations.generator.domain.ErrorCode;
 import com.reservations.generator.domain.OrphanRisk;
-import com.reservations.generator.domain.ReservationCreationException;
 import com.reservations.generator.domain.ReservationFailureClassifier;
 import com.reservations.generator.domain.flow.FlowRegistry;
 import com.reservations.generator.domain.model.FlowDefinition;
@@ -47,7 +46,7 @@ public class WebExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ModelAndView handleWebFailure(RuntimeException ex, HttpServletRequest request) {
         ErrorCode errorCode = ReservationFailureClassifier.classify(ex);
-        OrphanRisk orphanRisk = ex instanceof ReservationCreationException rce ? rce.getOrphanRisk() : OrphanRisk.NONE;
+        OrphanRisk orphanRisk = ReservationFailureClassifier.orphanRiskFor(ex);
         ResultView resultView = ResultView.from(errorCode, orphanRisk, safeMessage(ex));
 
         boolean fragmentOnly = request.getHeader(HtmxRequests.HX_REQUEST_HEADER) != null;

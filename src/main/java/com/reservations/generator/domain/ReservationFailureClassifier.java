@@ -81,4 +81,19 @@ public final class ReservationFailureClassifier {
     private static boolean isUnknownFlowOrInvalidPayload(Throwable ex) {
         return ex instanceof UnknownFlowException || ex instanceof InvalidPassengerPayloadException;
     }
+
+    /**
+     * The {@link OrphanRisk} for a whole-batch failure: reused directly from
+     * the failure itself when it already carries one
+     * ({@link ReservationCreationException} and subtypes), {@link OrphanRisk#NONE}
+     * otherwise (request-shape problems never dispatch anything upstream).
+     *
+     * <p>Extracted here (rather than left duplicated in {@code api.ErrorMapper}
+     * and {@code web.WebExceptionHandler}) for the same reason {@link #classify}
+     * is: so every driving adapter shares one classification rule instead of
+     * repeating the same {@code instanceof} check.
+     */
+    public static OrphanRisk orphanRiskFor(Throwable ex) {
+        return ex instanceof ReservationCreationException rce ? rce.getOrphanRisk() : OrphanRisk.NONE;
+    }
 }

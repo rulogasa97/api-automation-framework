@@ -96,4 +96,25 @@ class ReservationFailureClassifierTest {
                 .isEqualTo(ErrorCode.INTERNAL_ERROR);
         assertThat(ReservationFailureClassifier.classifyPerPassenger(null)).isEqualTo(ErrorCode.INTERNAL_ERROR);
     }
+
+    @Test
+    void orphanRiskForReusesTheOrphanRiskCarriedByAReservationCreationException() {
+        PostDispatchReservationException ex = new PostDispatchReservationException("dispatch timed out", null);
+
+        assertThat(ReservationFailureClassifier.orphanRiskFor(ex)).isEqualTo(OrphanRisk.POSSIBLE_ORPHAN_RESERVATION);
+    }
+
+    @Test
+    void orphanRiskForReusesNoneFromAPreDispatchFailure() {
+        PreDispatchReservationException ex = new PreDispatchReservationException("session acquisition failed", null);
+
+        assertThat(ReservationFailureClassifier.orphanRiskFor(ex)).isEqualTo(OrphanRisk.NONE);
+    }
+
+    @Test
+    void orphanRiskForDefaultsToNoneForAFailureOutsideTheReservationCreationExceptionHierarchy() {
+        RuntimeException ex = new IllegalStateException("totally unexpected");
+
+        assertThat(ReservationFailureClassifier.orphanRiskFor(ex)).isEqualTo(OrphanRisk.NONE);
+    }
 }

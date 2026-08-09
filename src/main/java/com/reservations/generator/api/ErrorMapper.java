@@ -3,7 +3,6 @@ package com.reservations.generator.api;
 import com.reservations.generator.api.dto.ErrorResponse;
 import com.reservations.generator.domain.ErrorCode;
 import com.reservations.generator.domain.OrphanRisk;
-import com.reservations.generator.domain.ReservationCreationException;
 import com.reservations.generator.domain.ReservationFailureClassifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -88,7 +87,7 @@ public final class ErrorMapper {
         }
         ErrorCode errorCode = ReservationFailureClassifier.classify(ex);
         return new MappedError(statusFor(errorCode),
-                new ErrorResponse(errorCode, flowId, orphanRiskFor(ex), null, safeMessage(ex)));
+                new ErrorResponse(errorCode, flowId, ReservationFailureClassifier.orphanRiskFor(ex), null, safeMessage(ex)));
     }
 
     /**
@@ -104,16 +103,6 @@ public final class ErrorMapper {
             case UPSTREAM_TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
             case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
-    }
-
-    /**
-     * The {@link OrphanRisk} for a whole-batch failure: reused directly from
-     * the failure itself when it already carries one
-     * ({@link ReservationCreationException} and subtypes), {@link OrphanRisk#NONE}
-     * otherwise (request-shape problems never dispatch anything upstream).
-     */
-    private static OrphanRisk orphanRiskFor(Throwable ex) {
-        return ex instanceof ReservationCreationException rce ? rce.getOrphanRisk() : OrphanRisk.NONE;
     }
 
     private static MappedError validationFailed(MethodArgumentNotValidException manv, String flowId) {
