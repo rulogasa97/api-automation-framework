@@ -51,8 +51,6 @@
                    th:value="${field.value()}"
                    th:required="${field.required()}"/>
         </div>
-
-        <span class="ual-field__error" th:if="${field.hasError()}" th:text="${field.errorMessage()}">error</span>
     </div>
 
     <button type="button" class="ual-btn ual-btn--remove"
