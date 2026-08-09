@@ -18,6 +18,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
@@ -91,10 +96,26 @@ class ReservationsGeneratorWebEndToEndTest {
                 "/ui/reservations", new HttpEntity<>(form, headers), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("WEB-ADA");
-        assertThat(response.getBody()).contains("WEB-GRACE");
-        assertThat(response.getBody()).contains("WEB-KATHERINE");
+        assertThat(pnrCodesInRenderedOrder(response.getBody()))
+                .as("PNR cards must render in submission order, not just be present somewhere in the body")
+                .containsExactly("WEB-ADA", "WEB-GRACE", "WEB-KATHERINE");
         assertThat(response.getBody()).doesNotContain("<html");
+    }
+
+    /**
+     * Extracts each rendered PNR card's code, in the order
+     * {@code fragments/result.html}'s {@code th:each="pnr : ${result.pnrs}"}
+     * emitted them — i.e. the actual on-page order, not merely which codes
+     * are present anywhere in the body (see the {@code data-copy-pnr}
+     * attribute {@code fragments/result.html} renders on each card).
+     */
+    private static List<String> pnrCodesInRenderedOrder(String html) {
+        Matcher matcher = Pattern.compile("data-copy-pnr=\"([^\"]+)\"").matcher(html);
+        List<String> codesInOrder = new ArrayList<>();
+        while (matcher.find()) {
+            codesInOrder.add(matcher.group(1));
+        }
+        return codesInOrder;
     }
 
     private static void stubUpstreamPnr(String passengerName, String pnrCode) {
