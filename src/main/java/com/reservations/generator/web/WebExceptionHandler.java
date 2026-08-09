@@ -50,10 +50,33 @@ public class WebExceptionHandler {
         ResultView resultView = ResultView.from(errorCode, orphanRisk, safeMessage(ex));
 
         boolean fragmentOnly = request.getHeader(HtmxRequests.HX_REQUEST_HEADER) != null;
-        ModelAndView mav = fragmentOnly ? new ModelAndView("fragments/error :: errorSection") : fullPage();
+        ModelAndView mav = fragmentOnly ? new ModelAndView("fragments/error :: errorSection") : fullPageOrFallback();
         mav.addObject("view", resultView);
         mav.setStatus(statusFor(errorCode));
         return mav;
+    }
+
+    /**
+     * The full-page error-rendering path — deliberately resilient to its own
+     * failure. {@link #fullPage()} calls {@code flowRegistry.require(...)}
+     * again (see its Javadoc), and that second call can itself throw (e.g. a
+     * misconfigured default flow) independently of whatever failure this
+     * handler is already reporting. Since this method backs an
+     * {@code @ExceptionHandler}, letting that second failure propagate would
+     * mean this handler throws out of exception handling itself, falling
+     * through to Spring Boot's generic Whitelabel/500 page instead of any
+     * deliberately-built error content. Falling back to the same
+     * {@code fragments/error :: errorSection} fragment the htmx path already
+     * uses keeps this method's contract ("never throws") intact without
+     * needing any form/flow context the broken {@link FlowRegistry} cannot
+     * supply.
+     */
+    private ModelAndView fullPageOrFallback() {
+        try {
+            return fullPage();
+        } catch (RuntimeException renderingFailure) {
+            return new ModelAndView("fragments/error :: errorSection");
+        }
     }
 
     /** See {@code ReservationFormController#submit}'s Javadoc for why the no-JS fallback shows a blank form. */
